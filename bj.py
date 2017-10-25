@@ -1,10 +1,6 @@
 import random
 
 
-print('\n\tBem vindo ao BlackJack!\n')
-bot = 'ibot'
-
-
 class Player(object):
     def __init__(self):
         self.name = ''
@@ -97,41 +93,42 @@ class Jogo(object):
     def __init__(self):
         self.runing = True
         self.total_pot = 0
-        self.turn=('p1')
+        self.turn = ('p1')
         self.win = False
-
 
     def check_win(self):
 
         self.win = False
-        if p1.score == 21 or (p1.score -21) < (Bot.score - 21):
+        if p1.score == 21 or (p1.score - 21) < (Bot.score - 21):
             self.win = True
             print(" VC GANHOU !!!")
             p1.pot += self.total_pot
             exit()
-        elif Bot.score == 21 or (Bot.score -21) < (p1.score - 21):
-            print( " O BOT Ganhou!!!\n\n vc perdeu %d " % (self.total_pot /2))
+        elif Bot.score == 21 or (Bot.score - 21) < (p1.score - 21):
+            print(" O BOT Ganhou!!!\n\n vc perdeu %d " % (self.total_pot / 2))
             Bot.pot += self.total_pot
 
     def restart(self):
-        if p1.restart == True:
+        if p1.restart is True:
             self.runing = False
             Bot.win = True
             self.check_win()
 
     def run(self):
+
+        print('\n\tBem vindo ao BlackJack!\n')
+
+        b = Baralho()
         p1 = Player()
         p1.get_name()
         Bot = Player()
-        Bot.name = bot
-        p1.hand.append(Baralho().pick_card())
-        Bot.hand.append(Baralho().pick_card())
+        Bot.name = 'ibot'
+        p1.hand.append(b.pick_card())
+        Bot.hand.append(b.pick_card())
 
-        while self.is_runing() == True:
-
+        while self.is_runing():
             if self.turn == 'p1':
-                print('Vamos la %s,  até agora vc tem %d cartas.Totalizando %d São elas: %s' % (p1.name, len(p1.hand), p1.sum_score(), p1.hand))
-                b = p1.get_bet()
+                print('Vamos la %s,  até agora vc tem %d cartas. Totalizando %d pontos. São elas: %s' % (p1.name, len(p1.hand), p1.sum_score(), p1.hand))
                 self.total_pot += 1
                 p1.more_card()
                 p1.sum_score()
@@ -139,14 +136,11 @@ class Jogo(object):
                 self.turn = 'Bot'
             else:
                 print('Agora e a vez do PC..')
+                if Bot.score > 15:
 
-                if Bot.score < 15:
-
-                    Bot.bet += 10
-                    Bot.bet += self.total_pot
+                    Bot.bet += self.total_pot / 2
                     Bot.pot -= Bot.bet
-                    Bot.hand.append(Baralho().pick_card())
-                    print(Bot.hand.append(Baralho().pick_card()))
+                    Bot.hand.append(b.pick_card())
                     Bot.sum_score()
                     self.check_win()
                     self.turn = 'p1'
@@ -157,19 +151,14 @@ class Jogo(object):
                     self.is_runing()
 
     def is_runing(self):
-        if p1.more == False and Bot.more == False:
+        if not p1.more and not Bot.more:
             self.runing = False
         return self.runing
-
-
-
-
 
 
 p1 = Player()
 p1.get_name()
 Bot = Player()
-Bot.name = bot
 p1.hand.append(Baralho().pick_card())
 Bot.hand.append(Baralho().pick_card())
 
