@@ -183,8 +183,8 @@ class Game(object):
     def cls(self):
         system("clear")
 
-    def message(self,msg = ''):
-        print('\n%s\n') % msg
+    def msg(self,msg = ''):
+        print('\n%s\n' % msg)
 
     def order_players(self):
         random.shuffle(self.players)
@@ -193,7 +193,8 @@ class Game(object):
         self.msg('Bem vindo ao BlackJack!')
         #self.msg('SEU SCORE: %d\t BOT SCORE: %d' % (p1.score,Bot.score))
         self.order_players()
-        msg = 'Ordem dos jogadores: %s' % ', '.join(self.players)
+        players_names = ', '.join(str(p) for p in self.players)
+        msg = 'Ordem dos jogadores: %s' % players_names
         self.msg(msg)
 
         b = Deck()
