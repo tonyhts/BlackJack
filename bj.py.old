@@ -1,76 +1,52 @@
 # coding: utf-8
 
-import random
-import re
-import urllib.request
 
-print('\n\tBem vindo ao BlackJack!\n')
+import random
+
+
 
 
 class Player(object):
-    def __init__(self, bot = False):
+    def __init__(self):
+        self.name = ''
         self.pot = 10
         self.score = 0
         self.bet = 1
         self.more = True
         self.hand = []
         self.restart = False
-        self.bot = bot
-        self.get_name()
 
     def get_name(self):
-        if self.bot:
-            print('Buscando um Robo que seja um oponente a sua altura...')
-            self.name = self.bot_names()
-            print('\t %s na área !!' % (self.name))
-        else:
-            self.name = input('Qual o seu nome? ').capitalize()
-
-
-    # TODO: pensar em algum sistema de nomes aleatórios e tal - #FEITO!
-    def bot_names(self):
-
-        '''Metodo fanfarrão que pesquisa nomes de robos na wikipedia #SempreAtualizado.rsrsrsr '''
-
-        robolandia = 'https://en.wikipedia.org/wiki/List_of_fictional_robots_and_androids'
-        u = urllib.request.urlopen(robolandia)
-        result = u.readlines()
-        nbolds = re.findall(r'<b>\w*</b>', str(result))
-        bots = []
-        for i in nbolds:
-            bots.append(re.sub(r'<b>|</b>', '', i))
-
-        return random.choice(bots)
-
+        self.name = input('Qual o seu nome? ').capitalize()
 
     def get_bet(self):
-        bet = 'a'
-        while type(bet) == str or bet is None:
+        _bet = 'a'
+        while type(_bet) == str or _bet == 0:
             try:
-                bet = int(input('quanto quer apostar? '))
+                _bet = int(input('quanto quer apostar? '))
                 while self.bet is None:
-                    bet = int(input('Digite um valor valido (apenas numeros !!)\nQuanto quer apostar? '))
-                    self.bet += bet
-                self.pot -= bet
-                self.bet = bet
+                    _bet = int(input('Digite um valor valido (apenas numeros !!\nQuanto quer apostar? '))
+                    self.bet += _bet
+                self.pot -= _bet
+                self.bet = _bet
             except TypeError:
                 print('Tenso!!!!!!!!!!\n\t Somente numeros, plz!')
 
     def sum_score(self):
         aces = 0
         ace = 0
-        score = 0
-        for value in self.hand:
-            score += value
-        self.score = score
+        _score = 0
+        for valor in self.hand:
+            _score += valor
+        self.score = _score
 
-        for card in self.hand:
-            if card == 'A':
+        for x in self.hand:
+            if x == 'A':
                 ace += 10
                 aces += 1
 
-        if aces > 0 and self.score + ace <= 21:
-            self.score = self.score + ace
+        if aces > 0 and ((self.score) + ace) <= 21:
+            self.score = ((self.score) + ace)
 
         return self.score
 
@@ -78,20 +54,20 @@ class Player(object):
         if self.more:
             r = input('vc esta com %d , deseja mais cartas? S ou N \n'  % (self.score)).lower()
             if r.startswith('s'):
-                self.hand.append(Deck().pick_card())
+                self.hand.append(Baralho().pick_card())
             else:
                 print('OK, Vamos ver se o Bot tem melhores cartas que vc!')
                 self.more = False
 
+class Robot(Player):
+    name = 'ibot'
 
-class Deck(object):
+class Baralho(object):
 
     def __init__(self):
         self.naipes = 'paus copas espadas ouro'.split()
         self.cartas = 'A J Q k'.split() + [x for x in range(2, 11)]
         self.deck = [(c, n) for n in self.naipes for c in self.cartas]
-        #baralho já começa embaralhado
-        self.shuffle()
 
     def __len__(self):
         return len(self.deck)
@@ -101,69 +77,67 @@ class Deck(object):
 
     def pick_card(self):
         if len(self.deck) >= 1:
-            card = self.deck.pop(random.randint(0, len(self.deck) - 1))
+            self.carta = self.deck.pop(random.randint(0, len(self.deck) - 1))
+            if type(self.carta[0]) == str:
+                self.valor = 10
+            else:
+                self.valor = self.carta[0]
         else:
             print('Deck Vazio')
-            card = None
-        #pick_card() retorna a carta
-        return card
+            self.valor = 0
+            self.carta = 'Nehuma'
+        print(self.valor)
+        return self.valor
 
-    '''
-    Este método deve ser do Jogo e não do baralho!
     def dist_cards(self):
         p1.hand = self.pick_card()
         Bot.hand = self.pick_card()
-    '''
 
-    def shuffle(self):
+    def embaralhar(self):
         random.shuffle(self.deck)
 
 
-class Game(object):
+class Jogo(object):
     def __init__(self):
         self.runing = True
         self.total_pot = 0
         self.turn = ('p1')
         self.win = False
-        self.players = []
 
-    def addPlayer(self,player):
-        if type(player) is Player:
-            self.players.append(player)
-        else:
-            print('Jogador inválido')
 
     def check_win(self):
 
         self.win = False
-        if p1.score == 21 or (p1.score - 21) < (bot.score - 21):
+        if p1.score == 21 or (p1.score - 21) < (Bot.score - 21):
             self.win = True
             print(" VC GANHOU !!!")
             p1.pot += self.total_pot
             exit()
-        elif bot.score == 21 or (bot.score - 21) < (p1.score - 21):
+        elif Bot.score == 21 or (Bot.score - 21) < (p1.score - 21):
             print(" O BOT Ganhou!!!\n\n vc perdeu %d " % (self.total_pot / 2))
-            bot.pot += self.total_pot
+            Bot.pot += self.total_pot
 
     def restart(self):
         if p1.restart is True:
             self.runing = False
-            bot.win = True
+            Bot.win = True
             self.check_win()
 
     def run(self):
 
-        b = Deck()
+        print('\n\tBem vindo ao BlackJack!\n')
+
+        b = Baralho()
         p1 = Player()
         p1.get_name()
-        Bot = Player()
+        Bot = Robot()
         Bot.name = 'ibot'
         p1.hand.append(b.pick_card())
         Bot.hand.append(b.pick_card())
 
         while self.is_runing():
             if self.turn == 'p1':
-                print('Vamos la %s,  até agora vc tem %d cartas. Totalizando %d pontos. São elas: %s' % (p1.name, len(p1.hand), p1.sum_score(), p1.hand))
+                print('Vamos la %s,  ate agora vc tem %d cartas. Totalizando %d pontos. São elas: %s' % (p1.name, len(p1.hand), p1.sum_score(), p1.hand))
                 self.total_pot += 1
                 p1.more_card()
                 p1.sum_score()
@@ -171,12 +145,13 @@ class Game(object):
                 self.turn = 'Bot'
             else:
                 print('Agora e a vez do PC..')
-                if Bot.score > 15:
+                if Bot.score < 15:
 
                     Bot.bet += self.total_pot / 2
                     Bot.pot -= Bot.bet
                     Bot.hand.append(b.pick_card())
                     Bot.sum_score()
+                    print('dentro do if')
                     self.check_win()
                     self.turn = 'p1'
                     self.is_runing()
@@ -184,17 +159,18 @@ class Game(object):
                 else:
                     Bot.more = False
                     self.is_runing()
+                    break
 
     def is_runing(self):
-        if not p1.more and not bot.more:
+        if not p1.more and not Bot.more:
             self.runing = False
         return self.runing
 
 
 p1 = Player()
-bot = Player(True)
+#p1.get_name()
+Bot = Robot()
+#p1.hand.append(Baralho().pick_card())
+#Bot.hand.append(Baralho().pick_card())
 
-game = Game()
-game.addPlayer(p1)
-game.addPlayer(bot)
-game.run()
+Jogo().run()
