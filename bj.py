@@ -11,7 +11,7 @@ class Player(object):
         self.pot = 10
         self.score = 0
         self.bet = 1
-        self.more = True
+        self.playing = True
         self.hand = []
         self.restart = False
         self.bot = bot
@@ -29,10 +29,13 @@ class Player(object):
     def __repr__(self):
         return self.name
 
+    def isHuman(self):
+        return not self.bot
+
     def bot_names(self):
-
-        '''Metodo fanfarrão que pesquisa nomes de robos na wikipedia #SempreAtualizado.rsrsrsr '''
-
+        '''
+        Metodo fanfarrão que pesquisa nomes de robos na wikipedia #SempreAtualizado.rsrsrsr
+        '''
         robolandia = 'https://en.wikipedia.org/wiki/List_of_fictional_robots_and_androids'
         u = urllib.request.urlopen(robolandia)
         result = u.readlines()
@@ -42,6 +45,7 @@ class Player(object):
             bots.append(re.sub(r'<b>|</b>', '', i))
 
         return random.choice(bots)
+
     #TODO: implentar direito essa joça, exibir o caixa na tela e tals
     def get_bet(self):
         bet = ''
@@ -59,7 +63,8 @@ class Player(object):
 
     def sum_score(self):
         score = 0
-        for value in self.hand:
+        for card in self.hand:
+            value = card[0]
             if type(value) is str and value is not 'A':
                 value = 10
             if value == 'A' and self.score + 11 <= 21:
@@ -72,16 +77,23 @@ class Player(object):
 
         return self.score
 
-    def more_card(self):
-        self.sum_score()
-        if self.more:
-            r = input('vc esta com %d , deseja mais cartas? S ou N \n'  % (self.score)).lower()
+    def play(self, deck):
+        while self.playing:
+            r = input('vc esta com %d pontos, deseja mais cartas? S ou N \n'  % (self.score)).lower()
             if r.startswith('s'):
-                self.hand.append(Deck().pick_card())
+                self.get_card(deck.pick_card())
             else:
-                print('OK, Vamos ver se o Bot tem melhores cartas que vc!')
-                p1.more = False
+                print('OK, Vamos ver se vc tem as melhores cartas!')
+                self.playing = False
 
+    def reset(self):
+        self.more = True
+        self.hand = []
+        self.score = 0
+
+    def get_card(self,card):
+        self.hand.append(card)
+        self.sum_score()
 
 class Deck(object):
 
@@ -123,7 +135,7 @@ class Game(object):
     def __init__(self):
         self.runing = True
         self.total_pot = 0
-        self.turn = ('p1')
+        #self.turn = ('p1')
         self.win = False
         self.players = []
 
@@ -171,57 +183,51 @@ class Game(object):
     def cls(self):
         system("clear")
 
+    def message(self,msg = ''):
+        print('\n%s\n') % msg
+
+    def order_players(self):
+        random.shuffle(self.players)
+
     def run(self):
-        print('\n\nSEU SCORE: %d\t BOT SCORE: %d\n\n' % (p1.score,Bot.score))
-        #TODO: tirar essa gambzinha de init pro restart.
-        p1.more = True
-        Bot.more = True
-        p1.hand, p1.score = [], 0
-        Bot.hand, Bot.score = [], 0
+        self.msg('Bem vindo ao BlackJack!')
+        #self.msg('SEU SCORE: %d\t BOT SCORE: %d' % (p1.score,Bot.score))
+        self.order_players()
+        msg = 'Ordem dos jogadores: %s' % ', '.join(self.players)
+        self.msg(msg)
+
         b = Deck()
-        p1.hand.append(b.pick_card())
-        Bot.hand.append(b.pick_card())
-        if random.randint(0,1) == 0:
-            self.turn = 'p1'
-        else:
-            self.turn = 'Bot'
+        for p in self.players:
+            p.reset()
+            p.get_card(b.pick_card())
 
         while self.is_runing():
-            if self.turn == 'p1':
-                print('Vamos la %s,  até agora vc tem %d cartas. Totalizando %d pontos. São elas: %s' % (p1.name, len(p1.hand), p1.sum_score(), p1.hand))
-                self.total_pot += 1
-                p1.more_card()
-                p1.sum_score()
-                self.check_win()
-                self.turn = 'Bot'
-            else:
-                print('Agora e a vez do PC..')
-                if Bot.score < 15:
-
-                    Bot.bet += self.total_pot / 2
-                    Bot.pot -= Bot.bet
-                    Bot.hand.append(b.pick_card())
-                    Bot.sum_score()
-                    self.check_win()
-                    self.turn = 'p1'
-                    self.is_runing()
+            for p in self.players:
+                if p.isHuman():
+                    msg = 'Vamos la %s,  até agora vc tem %d cartas. Totalizando %d pontos. São elas: %s' % (p.name, len(p.hand), p.sum_score(), p.hand)
+                    self.msg(msg)
+                    self.total_pot += 1
+                    p.play(b)
                 else:
-                    Bot.more = False
-                    self.turn = 'p1'
-                    self.check_win()
-                    self.is_runing()
+                    self.msg('Agora e a vez do %s...' % p.name)
+                    if p.score < 15:
+                        p.bet += self.total_pot / 2
+                        p.pot -= p.bet
+                        p.get_card(b.pick_card())
+                        p.sum_score()
+                    else:
+                        p.more = False
+            self.check_win()
 
     def is_runing(self):
         if not p1.more and not Bot.more:
             self.runing = False
         return self.runing
 
-Game().cls()
-print('\n\tBem vindo ao BlackJack!\n')
-
 p1 = Player()
-Bot = Player(True)
+bot = Player(True)
+
 game = Game()
 game.addPlayer(p1)
-game.addPlayer(Bot)
+game.addPlayer(bot)
 game.run()
