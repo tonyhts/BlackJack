@@ -42,7 +42,7 @@ class Player(object):
             bots.append(re.sub(r'<b>|</b>', '', i))
 
         return random.choice(bots)
-
+    #TODO: implentar direito essa joça, exibir o caixa na tela e tals
     def get_bet(self):
         bet = ''
         while type(bet) is not int:
@@ -119,7 +119,6 @@ class Game(object):
         self.win = False
         self.players = []
 
-
     def addPlayer(self,player):
         if type(player) is Player:
             self.players.append(player)
@@ -127,7 +126,6 @@ class Game(object):
             print('Jogador inválido')
 
     def check_win(self):
-
         self.win = False
         if p1.score == 21 or Bot.score > 21:
             self.win = True
@@ -158,19 +156,14 @@ class Game(object):
                 self.restart()
 
     def restart(self):
-
         print('\n\n\tNova Rodada!\n\n')
-
         self.runing = True
         game.run()
 
     def cls(self):
         system("clear")
 
-
-
     def run(self):
-
         print('\n\nSEU SCORE: %d\t BOT SCORE: %d\n\n' % (p1.score,Bot.score))
         #TODO: tirar essa gambzinha de init pro restart.
         p1.more = True
@@ -180,7 +173,6 @@ class Game(object):
         b = Deck()
         p1.hand.append(b.pick_card())
         Bot.hand.append(b.pick_card())
-
         if random.randint(0,1) == 0:
             self.turn = 'p1'
         else:
@@ -221,7 +213,6 @@ print('\n\tBem vindo ao BlackJack!\n')
 
 p1 = Player()
 Bot = Player(True)
-
 game = Game()
 game.addPlayer(p1)
 game.addPlayer(Bot)
