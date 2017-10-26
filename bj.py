@@ -21,13 +21,13 @@ class Player(object):
     def get_name(self):
         if self.bot:
             print('Buscando um Robo que seja um oponente a sua altura...')
-            self.name = self.bot_names()
+            self.name = str(self.bot_names())
             print('\t %s na área !!' % (self.name))
         else:
-            self.name = input('Qual o seu nome? ').capitalize()
+            self.name = str(input('Qual o seu nome? ').capitalize())
 
     def __repr__(self):
-        return str(self.name)
+        return self.name
 
     def bot_names(self):
 
@@ -96,16 +96,24 @@ class Deck(object):
         return len(self.deck)
 
     def __repr__(self):
-        print(self.deck)
+        return self.deck
 
-    def pick_card(self):
+    def pick_card(self, pos = 0):
         if len(self.deck) >= 1:
-            card = self.deck.pop(random.randint(0, len(self.deck) - 1))
+            card = self.deck.pop(pos)
         else:
-            print('Deck Vazio')
+            # print('Deck Vazio') prints devem ocorrer somente no jogo
             card = None
 
-        return card[0]
+        '''
+        Retornar a carta para manter modularidade. As cartas são tuplas e devem permancecer assim, seja no deck ou na mão.
+        A classe Deck pode ser usada em qualquer jogo (modularidade)
+        '''
+        return card
+
+    def pick_random_card(self):
+        rand = random.randint(len(self.deck) - 1)
+        return self.pick_card(rand)
 
     def shuffle(self):
         random.shuffle(self.deck)
